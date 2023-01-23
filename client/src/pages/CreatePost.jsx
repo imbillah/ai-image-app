@@ -5,6 +5,7 @@ import { generatePrompts } from "../utils";
 import { logo, preview } from "../assets";
 import Form from "../components/Form";
 import Loader from "../components/Loader";
+
 const CreatePost = () => {
   const [form, setForm] = useState({
     name: "",
@@ -20,17 +21,11 @@ const CreatePost = () => {
     if (form.prompt) {
       try {
         setImageGenerating(true);
-        const response = await fetch(dbUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            prompt: form.prompt,
-          }),
+        const response = await axios.post(dbUrl, {
+          prompt: form.prompt,
         });
 
-        const data = await response.json();
+        const data = await response.data;
         setForm({ ...form, image: `data:image/jpeg;base64,${data.image}` });
         alert("success");
       } catch (err) {
@@ -42,9 +37,27 @@ const CreatePost = () => {
       alert("Please provide proper prompt");
     }
   };
-  const handleSubmit = () => {
-    "";
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (form.prompt && form.image) {
+      setLoading(true);
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_DB_URL}/api/posts`,
+          form
+        );
+        response && alert("Success");
+        nevigate("/");
+      } catch (error) {
+        alert(err);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -52,6 +65,7 @@ const CreatePost = () => {
     const randomPrompt = generatePrompts(form.prompt);
     setForm({ ...form, prompt: randomPrompt });
   };
+
   return (
     <section className="max-w-7xl mx-auto p-2">
       <div>
@@ -116,14 +130,12 @@ const CreatePost = () => {
           <p className="text-gray-700 text-[16px] p-2">
             Once the image is generated you can share it with the community
           </p>
-          {!imageGenerating && (
-            <button
-              type="submit"
-              className="w-full text-center px-4 py-2.5 bg-teal-500 rounded-md text-white text-md sm:w-auto"
-            >
-              {loading ? "Sharing.." : "Share in Community"}
-            </button>
-          )}
+          <button
+            type="submit"
+            className="w-full text-center px-4 py-2.5 bg-teal-500 rounded-md text-white text-md sm:w-auto"
+          >
+            {loading ? "Sharing.." : "Share in Community"}
+          </button>
         </div>
       </form>
     </section>
