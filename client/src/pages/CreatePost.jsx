@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { generatePrompts } from "../utils";
-import { preview } from "../assets";
+import { logo, preview } from "../assets";
 import Form from "../components/Form";
 import Loader from "../components/Loader";
 const CreatePost = () => {
-  const nevigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     prompt: "",
@@ -13,13 +13,40 @@ const CreatePost = () => {
   });
   const [imageGenerating, setImageGenerating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const nevigate = useNavigate();
+  const dbUrl = `${import.meta.env.VITE_DB_URL}/api/generate`;
 
-  const generateImage = () => {};
+  const generateImage = async () => {
+    if (form.prompt) {
+      try {
+        setImageGenerating(true);
+        const response = await fetch(dbUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: form.prompt,
+          }),
+        });
+
+        const data = await response.json();
+        setForm({ ...form, image: `data:image/jpeg;base64,${data.image}` });
+        alert("success");
+      } catch (err) {
+        alert(err);
+      } finally {
+        setImageGenerating(false);
+      }
+    } else {
+      alert("Please provide proper prompt");
+    }
+  };
   const handleSubmit = () => {
     "";
   };
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: [e.target.value] });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
   const handleSurprise = () => {
     const randomPrompt = generatePrompts(form.prompt);
@@ -40,18 +67,19 @@ const CreatePost = () => {
             labelName="Your Name"
             type="text"
             name="name"
-            placeholder="Joe Davis"
+            placeholder="Ex., Joe Davis"
             value={form.name}
             handleChange={handleChange}
           />
           <Form
             labelName="Prompt"
             type="text"
-            name="propmt"
-            placeholder="a painting of a fox in the style of Starry Night"
+            name="prompt"
+            placeholder="An Impressionist oil painting of sunflowers in a purple vase…"
             value={form.prompt}
             handleChange={handleChange}
-            isSurprise={handleSurprise}
+            handleSurprise={handleSurprise}
+            isSurprise
           />
         </div>
         <div className="relative flex justify-center items-center bg-gray-50 border border-gray-400 text-gray-700 rounded-lg text-sm focus:ring-teal-500 focus:border-teal-500 p-3 h-64 w-64 my-5">

@@ -8,6 +8,7 @@ const Form = ({
   value,
   handleChange,
   isSurprise,
+  handleSurprise,
 }) => {
   return (
     <div>
@@ -21,7 +22,7 @@ const Form = ({
         {isSurprise && (
           <button
             type="button"
-            onClick={isSurprise}
+            onClick={handleSurprise}
             className="font-semibold text-sm bg-slate-300 py-2 px-3 rounded-[5px] text-black shadow-sm"
           >
             Surprise me
