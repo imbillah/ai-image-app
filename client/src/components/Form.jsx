@@ -23,9 +23,9 @@ const Form = ({
           <button
             type="button"
             onClick={handleSurprise}
-            className="font-semibold text-sm bg-slate-300 py-2 px-3 rounded-[5px] text-black shadow-sm"
+            className="font-semibold text-sm bg-teal-400 py-2 px-4 rounded-[5px] text-black shadow-sm"
           >
-            Surprise me
+            Get Idea
           </button>
         )}
       </div>
