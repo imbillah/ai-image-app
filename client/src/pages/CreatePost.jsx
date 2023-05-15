@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import axios from "axios";
 import { generatePrompts } from "../utils";
-import { logo, preview } from "../assets";
+import { preview } from "../assets";
 import Form from "../components/Form";
 import Loader from "../components/Loader";
 
@@ -18,7 +19,7 @@ const CreatePost = () => {
   const dbUrl = `${import.meta.env.VITE_DB_URL}/api/generate`;
 
   const generateImage = async () => {
-    if (form.prompt) {
+    if (form.name && form.prompt) {
       try {
         setImageGenerating(true);
         const response = await axios.post(dbUrl, {
@@ -27,14 +28,14 @@ const CreatePost = () => {
 
         const data = await response.data;
         setForm({ ...form, image: `data:image/jpeg;base64,${data.image}` });
-        alert("success");
+        Swal.fire("Good job!", "Your image has been generated", "success");
       } catch (err) {
-        alert(err);
+        Swal.fire("Opps!", `${err.message}`, "error");
       } finally {
         setImageGenerating(false);
       }
     } else {
-      alert("Please provide proper prompt");
+      Swal.fire("Oh No!", "Type your name & instruction", "info");
     }
   };
 
@@ -48,13 +49,24 @@ const CreatePost = () => {
           `${import.meta.env.VITE_DB_URL}/api/posts`,
           form
         );
-        response && alert("Success");
+        response &&
+          Swal.fire(
+            "Yey!",
+            "Your image has been shared with the community",
+            "success"
+          );
         nevigate("/");
       } catch (error) {
-        alert(err);
+        Swal.fire("Opps!", `${err.message}`, "error");
       } finally {
         setLoading(false);
       }
+    } else {
+      Swal.fire(
+        "Oh no!",
+        "You must generate an image before sharing",
+        "question"
+      );
     }
   };
 
@@ -81,15 +93,15 @@ const CreatePost = () => {
             labelName="Your Name"
             type="text"
             name="name"
-            placeholder="Ex., Joe Davis"
+            placeholder="Type your name"
             value={form.name}
             handleChange={handleChange}
           />
           <Form
-            labelName="Prompt"
+            labelName="Your Message"
             type="text"
             name="prompt"
-            placeholder="An Impressionist oil painting of sunflowers in a purple vase…"
+            placeholder="Type what you want to generate. Use the button above to get ideas"
             value={form.prompt}
             handleChange={handleChange}
             handleSurprise={handleSurprise}
